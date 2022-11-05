@@ -2,24 +2,27 @@ import cv2
 import numpy as np
 from tkinter import *
 from functions import nothing, get_features, matching_features
-from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB, INDEX_SIFT
+from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB, INDEX_SIFT, INDEX_SURF
 
 NAME_ALGORITHM1 = "AKAZE"
 NAME_ALGORITHM2 = "BRISK"
 NAME_ALGORITHM3 = "ORB"
 NAME_ALGORITHM4 = "SIFT"
+NAME_ALGORITHM5 = "SURF"
 NAMES_ALGORITHMS = [0,1,2,3]
 NAMES_ALGORITHMS[INDEX_AKAZE] = NAME_ALGORITHM1
 NAMES_ALGORITHMS[INDEX_BRISK] = NAME_ALGORITHM2
 NAMES_ALGORITHMS[INDEX_ORB] = NAME_ALGORITHM3
 NAMES_ALGORITHMS[INDEX_SIFT] = NAME_ALGORITHM4
-URL_IMAGE = "./images/sable.jpg"
+#NAMES_ALGORITHMS[INDEX_SURF] = NAME_ALGORITHM5
+
+URL_IMAGE = "./images/hamed2.jpg"
 
 def view():
     def test_algo(event):
         index = lbox.curselection()[0]
         cap = cv2.VideoCapture(0)
-        cv2.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
+        #cv2.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
         # cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.namedWindow("Logo")
         cv2.namedWindow("Trackbar")
@@ -59,28 +62,38 @@ def view():
             print("Getting features from train image ...")
             #gray_img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 
-            train_features = get_features(img=img, index=index)  #  octave=octave, octave_echelle=octave_echelle
-            print("train features:", len(train_features[0]))
+            ref_features= get_features(img=img, index=index)  #  octave=octave, octave_echelle=octave_echelle
+            print("train features:", len(ref_features[0]))
 
             _, frame = cap.read()
             webcam_blur_intensity = cv2.getTrackbarPos("webcam-blur", "Trackbar")
             frame = cv2.GaussianBlur(frame, (webcam_blur_intensity * 2 + 1, webcam_blur_intensity * 2 + 1), 0)
-            #gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
 
+            # train features
+
+
+            train_features = get_features(img=frame, index=index)
+            train_kps = train_features[0]
+            frame = cv2.drawKeypoints(frame, train_kps, None,
+                                      flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
             # detect features on test image
             print("Detecting features in test image ...")
-            region, kps = matching_features(frame, train_features, index, ratio_test=ratio_test)  # ,octave=octave
-            frame = cv2.drawKeypoints(frame, kps, np.array([]), color=(255, 0, 0))
-            if region is not None:
+            #region, kps = matching_features(ref_features=ref_features, train_features=train_features, index=index, ratio_test=ratio_test)  # ,octave=octave
+
+            back_match = matching_features(ref_features=ref_features, train_features=train_features, index=index, ratio_test=ratio_test)  # ,octave=octave
+
+            if back_match[0] is not None:
                 print("Logo detected ...")
-                # draw rotated bounding box
-                box = cv2.boxPoints(region)
-                box = np.int0(box)
-                cv2.drawContours(frame, [box], 0, (255, 0, 0), 2)
+                dst, index_good_keys = back_match
+                homography = cv2.polylines(frame, [np.int32(dst)], True, (255, 0, 0), 3)
+                frame = cv2.drawKeypoints(homography, index_good_keys, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
             else:
                 print("No logo detected ...")
+
             if index == 0:
+                cv2.setWindowProperty(NAME_ALGORITHM1, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
                 cv2.imshow(NAME_ALGORITHM1, frame)
             elif index == 1:
                 cv2.imshow(NAME_ALGORITHM2, frame)
@@ -88,9 +101,12 @@ def view():
                 cv2.imshow(NAME_ALGORITHM3, frame)
             elif index == 3:
                 cv2.imshow(NAME_ALGORITHM4, frame)
+            #elif index == 4:
+                #cv2.imshow(NAME_ALGORITHM5, frame)
 
             if cv2.waitKey(1) == ord('q'):
                 break
+
         cap.release()
         cv2.destroyAllWindows()
 
