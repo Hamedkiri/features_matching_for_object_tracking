@@ -87,8 +87,8 @@ class Main_window():
         self.algorithmes.add_separator()
         self.algorithmes.add_command(label="Orb", command=self.command_orb)
         self.algorithmes.add_separator()
-        self.algorithmes.add_command(label="Brisk", command=self.command_brisk)
-        self.algorithmes.add_separator()
+        #self.algorithmes.add_command(label="Brisk", command=self.command_brisk)
+        #self.algorithmes.add_separator()
         self.algorithmes.add_command(label="Desactive", command=self.command_desactive)
         self.mon_menu.add_cascade(label="Les algorithmes", menu=self.algorithmes)
 
@@ -96,15 +96,10 @@ class Main_window():
         self.active_tracking = tk.Checkbutton(root, text="Activer le tracking", variable=self.know_tracking_activate)
         self.active_tracking.grid(row=3, column=1)
 
-        cv2.namedWindow("Logo")
-        cv2.namedWindow("Trackbar")
-        cv2.createTrackbar("logo-blur", "Trackbar", 0, 5, nothing)
-        cv2.createTrackbar("logo-scale", "Trackbar", 100, 100, nothing)
-        cv2.createTrackbar("webcam-blur", "Trackbar", 0, 5, nothing)
-        cv2.createTrackbar("ratio-test", "Trackbar", 80, 100, nothing)
-        self.scale_percent = cv2.getTrackbarPos("logo-scale", "Trackbar")  # percent of original size
-        self.logo_blur_intensity = cv2.getTrackbarPos("logo-blur", "Trackbar")
-        self.ratio_test = cv2.getTrackbarPos("ratio-test", "Trackbar") / 100
+
+        self.scale_percent = 1
+        self.logo_blur_intensity = 0
+        self.ratio_test = 0.8
 
         self.update_image()
         #self.update_show_reference()
@@ -142,12 +137,8 @@ class Main_window():
                 self.update_show_reference()
                 reference_keypoints, reference_descriptors = get_features(image=image_sequence[0],
                                                                           index=index[0])
-                reference_image_to_gray = cv2.cvtColor(image_sequence[0], cv2.COLOR_BGR2GRAY)
 
-                width = int(reference_image_to_gray.shape[1] * self.scale_percent / 100)  # reference_scale[0]
-                height = int(reference_image_to_gray.shape[0] * self.scale_percent / 100)
-                dim = (width, height)
-                #reference_image_to_gray = cv2.resize(reference_image_to_gray, dim)
+
 
                 """reference_image_to_gray = cv2.GaussianBlur(reference_image_to_gray,
                                                            (self.logo_blur_intensity * 2 + 1,
@@ -226,7 +217,7 @@ class Main_window():
         self.canvas_show_image.create_image(0, 0, image=self.reference_photo, anchor=tk.NW)
         #self.root_show_reference.after(1, self.update_show_reference)
 
-    def update_image2(self):
+    def update_show_snapshot(self):
         """To update image on  tkinter window"""
 
         last_image = cv2.imread("images/frame.jpg", cv2.IMREAD_COLOR)
@@ -250,7 +241,7 @@ class Main_window():
             cv2.imwrite("images/"+"reference" + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
-        self.update_image2()
+        self.update_show_snapshot()
 
     def create_and_destroy_rectangle(self, event):
         rectangle = Main_window.rectangle
