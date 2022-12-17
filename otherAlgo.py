@@ -12,7 +12,7 @@ INDEX_ORB = 2
 INDEX_SIFT = 3
 INDEX_SURF = 4
 
-URL_IMAGE = "./images/SA.jpg"
+URL_IMAGE = "./images/hamed6.jpg"
 URL_IMAGE2 = "./images/hamed.jpg"
 
 
@@ -69,14 +69,28 @@ def search_homography(reference_image,test_image,best_matchs,reference_keypoints
             pts = np.float32([[0, 0], [0, h], [w, h], [w, 0]]).reshape(-1, 1, 2)
             if M is not None:
                 dst = cv.perspectiveTransform(pts, M)
+
+                if len(np.int32(dst)) == 4:
+
+                    x1 = np.int32(dst)[0][0][0]
+                    y1 = np.int32(dst)[0][0][1]
+                    x2 = np.int32(dst)[2][0][0]
+                    y2 = np.int32(dst)[2][0][1]
+
+
+
+
                 oui = []
                 for a in best_matchs:
                     oui.append(test_keypoints[a.trainIdx])
+                test_image_with_draw_keypoints = cv.drawKeypoints(test_image, oui, None,
+                                                                  flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+                if len(np.int32(dst)) == 4:
+                    image_with_homography = cv.rectangle(test_image_with_draw_keypoints, (x1, y1), (x2, y2), (0, 255, 0), 3)
+                else:
+                    image_with_homography = cv.polylines(test_image_with_draw_keypoints, [np.int32(dst)], True, (255, 0, 0), 3)
 
-                    image_with_homography = cv.polylines(test_image, [np.int32(dst)], True, (255, 0, 0), 3)
-                    test_image_with_draw_keypoints = cv.drawKeypoints(image_with_homography, best_matchs, None,
-                                                                      flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-                    return test_image_with_draw_keypoints
+                return image_with_homography
             else:
                 return test_image
         else:
@@ -87,7 +101,6 @@ def search_homography(reference_image,test_image,best_matchs,reference_keypoints
 
 
 def test_algo(event):
-    cv.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
     # cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv.namedWindow("Logo")
     cv.namedWindow("Trackbar")
@@ -97,7 +110,7 @@ def test_algo(event):
     cv.createTrackbar("ratio-test", "Trackbar", 80, 100, nothing)
     index = lbox.curselection()[0]
 
-    reference_image = cv.imread("./images/hamed4.jpg")  # Importation de l'image en niveau de gris, cv.IMREAD_GRAYSCALE
+    reference_image = cv.imread(URL_IMAGE)  # Importation de l'image en niveau de gris, cv.IMREAD_GRAYSCALE
 
 
     reference_keypoints, reference_descriptors = get_features(image=reference_image,index=index)
@@ -105,7 +118,9 @@ def test_algo(event):
 
 
 
-    cap = cv.VideoCapture(0)  # Capture des images obtenues par la webcam
+    #cap = cv.VideoCapture(0)  # Capture des images obtenues par la webcam
+    cap = cv.VideoCapture("./videos/hamed1.webm")
+
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
@@ -141,7 +156,10 @@ def test_algo(event):
         test_image_with_draw_keypoints = search_homography(reference_image=reference_image, test_image=frame,
                                                                best_matchs=best_matchs, reference_keypoints=reference_keypoints, test_keypoints=test_keypoints)
         cv.imshow("Homography", test_image_with_draw_keypoints)
-            # Display the resulting frame
+        cv.namedWindow("Homography", cv2.WND_PROP_FULLSCREEN)
+
+
+        # Display the resulting frame
         if cv.waitKey(1) == ord('q'):
                     break
 

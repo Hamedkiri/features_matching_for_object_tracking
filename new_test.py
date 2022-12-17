@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import cv2
 from functions import nothing, select_algorithm, algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features, random_choice_images
-from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB
+from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB, INDEX_SIFT
 from time import strftime
 
 
@@ -10,8 +10,6 @@ from time import strftime
 
 
 class Main_window():
-
-    """Interface of algorithm : Show tracking of object and manipulation of parameters"""
 
     root = tk.Tk()
     root.title("features-matching-tracking")
@@ -31,8 +29,7 @@ class Main_window():
     index = [0]
 
     URL_IMAGE = "./images/reference.jpg"
-    contain_image = {"reference_image": cv2.imread(URL_IMAGE, cv2.IMREAD_COLOR), "sequence_image": cv2.imread(URL_IMAGE, cv2.IMREAD_COLOR)}
-
+    contain_image = {"reference_image": cv2.imread(URL_IMAGE, cv2.IMREAD_COLOR), "sequence_image": None}
 
 
 
@@ -42,14 +39,9 @@ class Main_window():
 
     def __init__(self, side=400):
 
-        # Principal window
         root = Main_window.root
-        # Window to choice reference image
         self.root_two = tk.Toplevel(root)
         self.root_two.title("reference image")
-
-        self.root_show_reference = tk.Toplevel(root)
-        self.root_show_reference.title("Monter l'image de reference")
 
         self.side = side
 
@@ -67,15 +59,11 @@ class Main_window():
                                           height=self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.canvas_to_resize.grid(row=1, column=1)
 
-        self.canvas_show_image = tk.Canvas( self.root_show_reference, width=self.capture.get(cv2.CAP_PROP_FRAME_WIDTH),
-                                          height=self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.canvas_show_image.grid(row=1, column=1)
-
         self.canvas_to_resize.bind('<Double-1>', self.create_and_destroy_rectangle)
         self.canvas_to_resize.bind('<Button-1>', self.moving_rectangle)
 
         self.snapshot = tk.Button(root, text="Tirer une photo", command=self.snapshot)
-        self.snapshot.grid(row=4, column=1)
+        self.snapshot.grid(row=3, column=1)
 
         self.cropping = tk.Button(self.root_two, text="Rogner l'image", command=self.cropping_of_image)
         self.cropping.grid(row=2, column=1)
@@ -92,27 +80,22 @@ class Main_window():
         self.algorithmes.add_command(label="Desactive", command=self.command_desactive)
         self.mon_menu.add_cascade(label="Les algorithmes", menu=self.algorithmes)
 
-        self.know_tracking_activate = tk.IntVar()
-        self.active_tracking = tk.Checkbutton(root, text="Activer le tracking", variable=self.know_tracking_activate)
-        self.active_tracking.grid(row=3, column=1)
-
-        cv2.namedWindow("Logo")
-        cv2.namedWindow("Trackbar")
-        cv2.createTrackbar("logo-blur", "Trackbar", 0, 5, nothing)
-        cv2.createTrackbar("logo-scale", "Trackbar", 100, 100, nothing)
-        cv2.createTrackbar("webcam-blur", "Trackbar", 0, 5, nothing)
-        cv2.createTrackbar("ratio-test", "Trackbar", 80, 100, nothing)
-        self.scale_percent = cv2.getTrackbarPos("logo-scale", "Trackbar")  # percent of original size
-        self.logo_blur_intensity = cv2.getTrackbarPos("logo-blur", "Trackbar")
-        self.ratio_test = cv2.getTrackbarPos("ratio-test", "Trackbar") / 100
+        """self.curseur_reference_blur = tk.Scale(root, orient="horizontal", command=self.function_reference_blur, from_=0, to=2, label='Blur image_ref')
+        self.curseur_reference_blur.set(1)
+        self.curseur_reference_blur.grid(row=2, column=2)
+        self.curseur_reference_scale = tk.Scale(root, orient="horizontal", command=self.function_reference_scale, from_=0, to=2, label='Scale')
+        self.curseur_reference_scale.set(1)
+        self.curseur_reference_scale.grid(row=3, column=2)
+        self.curseur_webcam_blur = tk.Scale(root, orient="horizontal", command=self.function_webcam_blur, from_=0, to=2, label='Webcam blur')
+        self.curseur_webcam_blur.set(1)
+        self.curseur_webcam_blur.grid(row=4, column=2)
+        self.curseur_ratio_test = tk.Scale(root, orient="horizontal", command=self.function_ratio_test, from_=0, to=2, label='Ratio test')
+        self.curseur_ratio_test.set(1)
+        self.curseur_ratio_test.grid(row=5, column=2)"""
 
         self.update_image()
-        #self.update_show_reference()
 
         root.mainloop()
-
-        cv2.destroyAllWindows()
-
 
     def get_frame(self):
         """To get image from camera"""
@@ -126,37 +109,56 @@ class Main_window():
         else:
             return (ret, None)
 
-    def application_of_algorithm(self, frame, image, index=[0]):
-
+    def update_image(self):
+        """To update image on  tkinter window"""
+        root = Main_window.root
         contain_image = Main_window.contain_image
 
-        contain_image["reference_image"] = cv2.imread(Main_window.URL_IMAGE, cv2.IMREAD_COLOR)
+        URL_IMAGE = Main_window.URL_IMAGE
+        index = Main_window.index
+        cv2.namedWindow("Logo")
+        cv2.namedWindow("Trackbar")
+        cv2.createTrackbar("logo-blur", "Trackbar", 0, 5, nothing)
+        cv2.createTrackbar("logo-scale", "Trackbar", 100, 100, nothing)
+        cv2.createTrackbar("webcam-blur", "Trackbar", 0, 5, nothing)
+        cv2.createTrackbar("ratio-test", "Trackbar", 80, 100, nothing)
 
-        image_sequence = [image]
-        #URL_IMAGE = Main_window.URL_IMAGE
-        #print(self.know_tracking_activate.get())
 
+        # contain_image["reference_image"] = cv.imread(URL_IMAGE)
+        contain_image["sequence_image"] = contain_image["reference_image"]
+        #print(contain_image["sequence_image"])
+
+        reference_blur = Main_window.reference_blur
+        """reference_scale = Main_window.reference_scale
+        webcam_blur = Main_window.webcam_blur
+        ratio_test = Main_window.ratio_test"""
+
+        # Get a frame from the video source
+        ret, frame = self.get_frame()
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting ...")
 
         try:
             if index[0] != 0:
-                self.update_show_reference()
-                reference_keypoints, reference_descriptors = get_features(image=image_sequence[0],
+                reference_keypoints, reference_descriptors = get_features(image=contain_image["sequence_image"],
                                                                           index=index[0])
-                reference_image_to_gray = cv2.cvtColor(image_sequence[0], cv2.COLOR_BGR2GRAY)
+                reference_image_to_gray = cv2.cvtColor(contain_image["sequence_image"], cv2.COLOR_BGR2GRAY)
+                scale_percent = cv2.getTrackbarPos("logo-scale", "Trackbar")  # percent of original size
 
-                width = int(reference_image_to_gray.shape[1] * self.scale_percent / 100)  # reference_scale[0]
-                height = int(reference_image_to_gray.shape[0] * self.scale_percent / 100)
+                width = int(reference_image_to_gray.shape[1] * scale_percent / 100)  # reference_scale[0]
+                height = int(reference_image_to_gray.shape[0] * scale_percent/ 100)
                 dim = (width, height)
-                #reference_image_to_gray = cv2.resize(reference_image_to_gray, dim)
+                reference_image_to_gray = cv2.resize(reference_image_to_gray, dim)
+                reference_image_to_gray = cv2.GaussianBlur(reference_image_to_gray,
+                                                           (int(reference_blur[0]) * 2 + 1,
+                                                            int(reference_blur[0]) * 2 + 1),
+                                                           0)
 
-                """reference_image_to_gray = cv2.GaussianBlur(reference_image_to_gray,
-                                                           (self.logo_blur_intensity * 2 + 1,
-                                                            self.logo_blur_intensity * 2 + 1),
-                                                           0)"""
+                # cv.imshow('Logo', contain_image["sequence_image"])
 
-                #cv2.imshow('Logo', image)
-
-
+                # if frame is read correctly ret is True
+                # frame = cv2.GaussianBlur(frame, (webcam_blur[0]* 2 + 1, webcam_blur[0] * 2 + 1), 0)
+                # try:
 
                 test_keypoints, test_descriptors = get_features(image=frame, index=index[0])
 
@@ -164,67 +166,43 @@ class Main_window():
                                                                         reference_descriptors=reference_descriptors,
                                                                         test_descriptors=test_descriptors)
 
-                best_matchs = search_good_match(index=index[0], ratio_test=self.ratio_test,
+                best_matchs = search_good_match(index=index[0], ratio_test=1,
                                                 keypoints_who_matches=keypoints_who_matches)  # ratio_test[0]
 
                 viewimage, test_image_with_draw_keypoints, yes = search_homography_between_images(
-                    reference_image=image_sequence[0], test_image=frame,
+                    reference_image=contain_image["sequence_image"], test_image=frame,
                     best_matchs=best_matchs, reference_keypoints=reference_keypoints,
                     test_keypoints=test_keypoints)
                 if yes == True:
-                    #cv2.imwrite("./images/test.jpg", viewimage)
-                    if self.know_tracking_activate.get() == 1:
-                        contain_image["sequence_image"] = viewimage
-                    else:
-                        contain_image["sequence_image"] = contain_image["reference_image"]
+                    cv2.imwrite(
+                        "/home/hamed/My_projects/Machine_Learning/Computer_vision/features_matching/images/images_coffres/test.jpg",
+                        viewimage)
+                    contain_image["sequence_image"] = viewimage
+                    # contain_image["sequence_image"] = contain_image["reference_image"] #random_choice_images([viewimage, contain_image["reference_image"]])
 
-                return test_image_with_draw_keypoints
+                else:
+                    contain_image["sequence_image"] = contain_image[
+                        "reference_image"]  # contain_image["reference_image"] #random_choice_images([viewimage, contain_image["reference_image"]])
 
-
+                    # except:
+                    # pass
+                self.photo = ImageTk.PhotoImage(image=Image.fromarray(test_image_with_draw_keypoints))
+                self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
             else:
-                return None
+                self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
 
         except:
-
-            return None
-
-
-
-
-    def update_image(self):
-        """To update image on  tkinter window"""
-
-        #URL_IMAGE = Main_window.URL_IMAGE
-        root = Main_window.root
-        index = Main_window.index
-        contain_image = Main_window.contain_image
-
-        # Get a frame from the video source
-        ret, frame = self.get_frame()
-        if not ret:
-            print("Can't receive frame (stream end?). Exiting ...")
-
-        image_back = self.application_of_algorithm(frame=frame, image=contain_image["sequence_image"], index=index)
-
-        if image_back is not None:
-            self.photo = ImageTk.PhotoImage(image=Image.fromarray(image_back))
-            self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
-
-        else:
-            contain_image["sequence_image"] = contain_image["reference_image"]
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
 
-        root.after(1, self.update_image)
 
-    def update_show_reference(self):
-        contain_image = Main_window.contain_image
 
-        self.reference_photo = ImageTk.PhotoImage(image=Image.fromarray(contain_image["sequence_image"]))
-        self.canvas_show_image.create_image(0, 0, image=self.reference_photo, anchor=tk.NW)
-        #self.root_show_reference.after(1, self.update_show_reference)
+
+        root.after(5, self.update_image)
+
 
     def update_image2(self):
         """To update image on  tkinter window"""
@@ -366,5 +344,6 @@ class Main_window():
 
 
 
+Main_window(side=1000)
 
 

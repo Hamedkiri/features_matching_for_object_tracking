@@ -1,93 +1,76 @@
 
+from tkinter import *
 
-import cv2
-
-"""cap = cv2.VideoCapture(0)
-i=0 #frame counter
-frameTime = 1 # time of each frame in ms, you can add logic to change this value.
-while(cap.isOpened()):
-    ret = cap.grab() #grab frame
-    i=i+1 #increment counter
-    if i % 1 == 0: # display only one third of the frames, you can change this parameter according to your needs
-        ret, frame = cap.retrieve() #decode frame
-        cv2.imshow('frame',frame)
-        if cv2.waitKey(frameTime) & 0xFF == ord('q'):
-            break
-cap.release()
-cv2.destroyAllWindows()"""
-
-def readcam(i):
-
-    if i % 3 == 0:
-        ret, frame = cap.retrieve()  # decode frame
-        return frame
+root = Tk()
+cnv = Canvas(root, width=400, height=400)
+cnv.pack()
 
 
-cap = cv2.VideoCapture(0)
-i=0 #frame counter
-frameTime = 1 # time of each frame in ms, you can add logic to change this value.
-while(cap.isOpened()):
-    i = i + 1
-    frame = readcam(i)
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(frameTime) & 0xFF == ord('q'):
-            break
-cap.release()
-cv2.destroyAllWindows()
+
+old=None
+
+def rayon(r):
+    global old
+    r=int(r)
+    cnv.delete(old)
+    old=cnv.create_oval(200-r,200-r,200+r, 200+r)
+
+
+curseur = Scale(root, orient = "horizontal",
+
+command=rayon, from_=0, to=200)
+curseur.pack()
+
+
+
+root.mainloop()
 
 
 
 
 
+"""import cv2 as cv
+img = cv.imread("./images/hamed9_.jpg")
 
+viewimage = img[10:565, 10:400]
+print(img.shape)
+print(viewimage.shape)
+cv.imwrite("/home/hamed/My_projects/Machine_Learning/Computer_vision/features_matching/images/images_coffres/you.jpg", viewimage)"""
 
+"""def of_circle(s):
+    def draw_circle(event,x,y,flags,param):
+        if event == cv.EVENT_LBUTTONDBLCLK:
+            x1 = x-s
+            y1 = y-s
+            x2 = x+s
+            y2 = y+s
+            #crop = img[50:180, 100:300]
+            #cv.imshow("Homography", crop)
+            cv.rectangle(img,(x1,y1),(x2,y2),(0,255,0),3)
 
+            #cv.circle(img,(x,y),300,(255,0,0),-1)
+    return draw_circle
 
-
-
-
-
-
-
-
-
-
-
-
-
-"""import numpy as np
-import cv2 as cv
-# mouse callback function
-
-
-
-def draw_circle(event,x,y,flags,param):
-    if event == cv.EVENT_LBUTTONDBLCLK:
-        cv.circle(img,(x,y),100,(255,0,0),-1)
 
 
 
 # Create a black image, a window and bind the function to window
-img = np.zeros((512,512,3), np.uint8)
-
+img = np.zeros((512,512,3), np.uint8)+255
 def back(*args):
     pass
 
-cv.namedWindow('button')
-button = cv.createButton("back", back, None,cv.QT_PUSH_BUTTON,0)
 
-cv.rectangle(button,(384,0),(510,128),(0,255,0),3)
 
 cv.namedWindow('image',cv.WND_PROP_FULLSCREEN)
-cv.setMouseCallback('image',draw_circle)
+cv.setMouseCallback('image', of_circle(100))
 while(1):
-    cv.imshow('image',img)
+    cv.imshow('image', img)
     if cv.waitKey(20) & 0xFF == 27:
         break
 cv.destroyAllWindows()
 
-# Import required Libraries
-from tkinter import *
+# Import required Libraries"""
+"""from tkinter import *
 from PIL import Image, ImageTk
 import cv2
 

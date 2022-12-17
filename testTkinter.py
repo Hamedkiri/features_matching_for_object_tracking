@@ -366,5 +366,5 @@ class Main_window():
 
 
 
-
+Main_window(side=1000)
 
