@@ -3,7 +3,7 @@ from PIL import Image, ImageTk
 import cv2
 from functions import nothing, select_algorithm, algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features, random_choice_images
 from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB
-from time import strftime
+import time
 
 
 # Create an instance of TKinter Window or frame
@@ -51,6 +51,8 @@ class Main_window():
         self.root_show_reference = tk.Toplevel(root)
         self.root_show_reference.title("Monter l'image de reference")
 
+        self.window_calibration = None
+
         self.side = side
 
         self.capture = cv2.VideoCapture(0)
@@ -77,6 +79,8 @@ class Main_window():
         self.snapshot = tk.Button(root, text="Tirer une photo", command=self.snapshot)
         self.snapshot.grid(row=4, column=1)
 
+
+
         self.cropping = tk.Button(self.root_two, text="Rogner l'image", command=self.cropping_of_image)
         self.cropping.grid(row=2, column=1)
 
@@ -100,6 +104,29 @@ class Main_window():
         self.scale_percent = 1
         self.logo_blur_intensity = 0
         self.ratio_test = 0.8
+
+        # To do the calibration
+        #self.window_calibration = None
+        self.active_calibration = False
+
+        """self.window_calibration = tk.Toplevel(root)
+        self.window_calibration.title("Fenêtre pour calibration")
+
+        self.canvas_to_calibration = tk.Canvas(self.window_calibration,
+                                               width=self.capture.get(cv2.CAP_PROP_FRAME_WIDTH),
+                                               height=self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.canvas_to_calibration.grid(row=1, column=1)"""
+
+        self.Do_calibration = tk.Button(root, text="Calibration photos", command=self.interface_to_calibration)
+        self.Do_calibration.grid(row=5, column=1)
+
+       # if self.active_calibration:
+        #self.interface_to_calibration()
+
+        self.text_calibration = "Une serie de 25 photos va suivre. Une photo chaque 2s."
+        self.active_calibration = False
+        self.counter_to_calibration = 0
+
 
         self.update_image()
         #self.update_show_reference()
@@ -166,8 +193,8 @@ class Main_window():
                     #cv2.imwrite("./images/test.jpg", viewimage)
                     if self.know_tracking_activate.get() == 1:
                         contain_image["sequence_image"] = viewimage
-                    else:
-                        contain_image["sequence_image"] = contain_image["reference_image"]
+                else:
+                    contain_image["sequence_image"] = contain_image["reference_image"]
 
                 return test_image_with_draw_keypoints
 
@@ -193,19 +220,34 @@ class Main_window():
 
         # Get a frame from the video source
         ret, frame = self.get_frame()
+
+        #if self.active_calibration:
+            #frame = cv2.putText(img=frame, text=self.text_calibration, org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 255, 0),thickness=3)
+
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
 
         image_back = self.application_of_algorithm(frame=frame, image=contain_image["sequence_image"], index=index)
 
         if image_back is not None:
+
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(image_back))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
         else:
+
+            WIDTH = 400
+            HEIGHT = 300
+            C = (WIDTH // 2, HEIGHT // 2)
+
             contain_image["sequence_image"] = contain_image["reference_image"]
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+            if self.active_calibration:
+                text = self.canvas.create_text(C, anchor=tk.W, text=self.text_calibration, fill="blue")
+                self.canvas.after(1200, self.wipe_off, text)
+                #print("erer")
+
 
 
         root.after(1, self.update_image)
@@ -280,8 +322,6 @@ class Main_window():
 
 
 
-
-
             moving_x = x - mouse_information[0]
             moving_y = y - mouse_information[1]
 
@@ -298,7 +338,7 @@ class Main_window():
             image_register = cv2.imread("images/frame.jpg", cv2.IMREAD_COLOR)
             image_register = cv2.cvtColor(image_register, cv2.COLOR_BGR2RGB)
 
-            print((x, y))
+            #print((x, y))
 
             cv2.imwrite("images/"+"reference" + ".jpg", cv2.cvtColor(image_register[y-250:y+250, x-250:x+250], cv2.COLOR_RGB2BGR))
 
@@ -341,6 +381,58 @@ class Main_window():
         ratio_test = Main_window.ratio_test
         ratio_test[0] = ratio
         #ratio_test[0] = (1/100)*float(ratio)
+
+
+    def interface_to_calibration(self):
+
+
+        self.active_calibration = True
+        ret, frame = self.get_frame()
+
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting ...")
+
+        else:
+            self.active_calibration = True
+
+    def wipe_off(self, ident):
+        ret, frame = self.get_frame()
+        self.counter_to_calibration = self.counter_to_calibration + 1
+        if self.counter_to_calibration % 2 == 0:
+            self.canvas.delete(ident)
+            self.text_calibration = str(self.counter_to_calibration)+"s"
+            if ret:
+                cv2.imwrite("./images_to_calibration/" + "image_calib" + str(self.counter_to_calibration) + ".jpg",
+                            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

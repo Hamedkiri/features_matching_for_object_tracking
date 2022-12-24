@@ -3,6 +3,7 @@ import cv2 as cv
 import numpy as np
 import random
 import cv2
+from location import Location
 
 
 INDEX_AKAZE = 1
@@ -95,13 +96,27 @@ def search_homography_between_images(reference_image,test_image,best_matchs,refe
                 #print(np.int32(dst))
                 if len(np.int32(dst)) == 4:
                     x1 = np.int32(dst)[0][0][0]
-                    y1 = np.int32(dst)[0][0][1]
+                    y1 = np.int32(dst)[0][0][1]  # left top
                     x2 = np.int32(dst)[1][0][0]
-                    y2 = np.int32(dst)[1][0][1]
+                    y2 = np.int32(dst)[1][0][1]  # right top
                     x3 = np.int32(dst)[2][0][0]
-                    y3 = np.int32(dst)[2][0][1]
+                    y3 = np.int32(dst)[2][0][1]  # right bottom
                     x4 = np.int32(dst)[3][0][0]
-                    y4 = np.int32(dst)[3][0][1]
+                    y4 = np.int32(dst)[3][0][1]  # left bottom
+                    #print(np.int32(dst))
+
+                    image_points_2D = np.array([
+                        (x1, y1),  # left top
+
+                        (x2, y2),  # right top
+
+                        (x3, y3),  # right bottom
+
+                        (x4, y4),  # left bottom
+
+                    ], dtype="double")
+
+                    geolocation = Location(image_points=image_points_2D)
 
                 oui = []
                 for a in best_matchs:
@@ -137,9 +152,14 @@ def search_homography_between_images(reference_image,test_image,best_matchs,refe
                              # "(x4,y4)=" + str((x4, y4)))
 
                         new_reference_image = test_image[y1:y3, x1:x3]
+                        #location = Location(image_points=[[x1, y1], [x2, y2], [x3, y3], [x4, y4]]).object_location()
+                        #print("test:"+str(location))
+
                         #print(test_image_to_gray[x1:x2, y2:y1])
-                        #image_with_homography = cv.rectangle(test_image_with_draw_keypoints, (x1, y1), (x3, y3),
-                                                             #(0, 255, 0), 3)
+                        image_with_homography = cv.rectangle(test_image_with_draw_keypoints, (x1, y1), (x3, y3),
+                                                             (0, 255, 0), 3)
+                        #image_with_homography = geolocation.draw_line(image=image_with_homography)
+                        print(geolocation.object_location())
                     else:
                         yes = False
 
@@ -160,7 +180,3 @@ def random_choice_images(data):
     n = len(data)
     index = random.randint(0, n-1)
     return data[index]
-
-
-
-
