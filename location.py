@@ -3,13 +3,13 @@ import json
 import numpy as np
 
 RealityCoordinatePoints = points_3D = np.array([
-                      (-1, 1, 0),  # left top
+                      (-0.1, 0.1, 0),  # left top
 
-                      (1, 1, 0),  # right top
+                      (0.1, 0.1, 0),  # right top
 
-                      (1, -1, 0),  # right bottom
+                      (0.1, -0.1, 0),  # right bottom
 
-                      (-1, -1, 0),  # left bottom
+                      (-0.1, -0.1, 0),  # left bottom
                      ], dtype="double")
 class Location():
     def __init__(self, image_points, object_points=RealityCoordinatePoints, path_file_calibration="./images_to_calibration/calib_data_rational_init.json"):
@@ -23,9 +23,9 @@ class Location():
 
     def object_location(self):
         success, rotation_vector, translation_vector = cv2.solvePnP(objectPoints=self.object_points, imagePoints=self.image_points,
-                            cameraMatrix=self.camera_matrix, distCoeffs=self.distortion_coefficients, flags=self.flags)
+                                                        cameraMatrix=self.camera_matrix, distCoeffs=self.distortion_coefficients, flags=self.flags)
         if success:
-            return rotation_vector, translation_vector
+            return translation_vector
         else:
             return None, None
 

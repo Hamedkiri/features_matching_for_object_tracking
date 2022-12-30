@@ -109,6 +109,3 @@ class Calibration_of_camera():
 
 
 
-Ty = Calibration_of_camera()
-Ty.show_coners()
-Ty.make_calibration()

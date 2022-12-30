@@ -11,7 +11,10 @@ INDEX_BRISK = 2
 INDEX_ORB = 3
 INDEX_SIFT = 4
 INDEX_SURF = 5
-
+RectangleCalibrationTop_x = 500
+RectangleCalibrationTop_y = 100
+RectangleCalibrationBottom_x = 900
+RectangleCalibrationBottom_y = 600
 
 
 
@@ -80,7 +83,7 @@ def search_good_match(index,keypoints_who_matches,ratio_test=0.8):
 def search_homography_between_images(reference_image,test_image,best_matchs,reference_keypoints,test_keypoints):
     """ To search homography between the two images """
     new_reference_image = reference_image
-    reference_image_to_gray = cv.cvtColor(reference_image, cv.COLOR_BGR2GRAY)
+    reference_image_to_gray = cv.cvtColor(reference_image, cv2.COLOR_BGR2GRAY)
     test_image_to_gray = cv.cvtColor(test_image, cv.COLOR_BGR2GRAY)
     shape_reference_image = reference_image_to_gray.shape
     yes = False
@@ -156,10 +159,15 @@ def search_homography_between_images(reference_image,test_image,best_matchs,refe
                         #print("test:"+str(location))
 
                         #print(test_image_to_gray[x1:x2, y2:y1])
-                        image_with_homography = cv.rectangle(test_image_with_draw_keypoints, (x1, y1), (x3, y3),
+                        image_with_homography = cv2.rectangle(test_image_with_draw_keypoints, (x1, y1), (x3, y3),
                                                              (0, 255, 0), 3)
                         #image_with_homography = geolocation.draw_line(image=image_with_homography)
-                        print(geolocation.object_location())
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        distance_of_camera = round(np.linalg.norm(geolocation.object_location(), ord=2),2)
+                        image_with_homography = cv2.putText(image_with_homography, str(distance_of_camera)+"m", (50, 50), font, 1,
+                                                            (0, 255, 255), 2, cv2.LINE_4)
+
+                        #print(geolocation.object_location())
                     else:
                         yes = False
 
@@ -176,7 +184,64 @@ def search_homography_between_images(reference_image,test_image,best_matchs,refe
     except:
         return new_reference_image, test_image, yes
 
-def random_choice_images(data):
-    n = len(data)
-    index = random.randint(0, n-1)
-    return data[index]
+
+"""def random_choice_submatrix(image, width, height):
+
+    MinimalSizeScreen = 250
+    SizeSubMatrix = 200
+    min_mid = min(int(width/2), int(height/2))
+    # print(min_mid)
+    if width > MinimalSizeScreen and height > MinimalSizeScreen:
+        i = random.randint(0, min_mid)
+
+        return image[500: 900, 100: 600]
+    else:
+        print("matrice de trop petite taille")
+        return None"""
+
+
+def chessBoartDetector(image):
+
+    """Algorithm to recognize chessboart"""
+    #NumberOfSubMatrix = 1
+
+    WhiteBlackRatio = 0.5  # Ratio to consider that pixel is white or black
+
+    Interval = 0.1
+
+    count_white = 0
+    count_black = 0
+    probability = [None]
+
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+
+    image = image / image.max()
+    image = image[RectangleCalibrationTop_x: RectangleCalibrationBottom_x,  RectangleCalibrationTop_y: RectangleCalibrationBottom_y]
+    width = image.shape[0]
+    height = image.shape[1]
+
+
+
+
+
+    for i in range(width):
+        for j in range(height):
+            if image[i, j] > WhiteBlackRatio:
+                count_white = count_white + 1
+            else:
+                count_black = count_black + 1
+
+    probability[0] = min(count_white, count_black)/max(count_white, count_black)
+    print(probability)
+    if probability[0] > 0.99:
+        return 1
+    else:
+        return 0
+
+
+
+
+
+
+

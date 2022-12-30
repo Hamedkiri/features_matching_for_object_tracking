@@ -1,12 +1,14 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import cv2
-from functions import nothing, select_algorithm, algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features, random_choice_images
-from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB
+from functions import nothing, select_algorithm, algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features, chessBoartDetector
+from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB, RectangleCalibrationTop_x, RectangleCalibrationTop_y, RectangleCalibrationBottom_x, RectangleCalibrationBottom_y
 import time
-
+from calibration import Calibration_of_camera
 
 # Create an instance of TKinter Window or frame
+
+
 
 
 class Main_window():
@@ -55,9 +57,12 @@ class Main_window():
 
         self.side = side
 
+
         self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1100)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1100)
+
+
 
         self.photo = None
         self.reference_photo = None
@@ -91,8 +96,6 @@ class Main_window():
         self.algorithmes.add_separator()
         self.algorithmes.add_command(label="Orb", command=self.command_orb)
         self.algorithmes.add_separator()
-        #self.algorithmes.add_command(label="Brisk", command=self.command_brisk)
-        #self.algorithmes.add_separator()
         self.algorithmes.add_command(label="Desactive", command=self.command_desactive)
         self.mon_menu.add_cascade(label="Les algorithmes", menu=self.algorithmes)
 
@@ -109,27 +112,19 @@ class Main_window():
         #self.window_calibration = None
         self.active_calibration = False
 
-        """self.window_calibration = tk.Toplevel(root)
-        self.window_calibration.title("Fenêtre pour calibration")
-
-        self.canvas_to_calibration = tk.Canvas(self.window_calibration,
-                                               width=self.capture.get(cv2.CAP_PROP_FRAME_WIDTH),
-                                               height=self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.canvas_to_calibration.grid(row=1, column=1)"""
-
-        self.Do_calibration = tk.Button(root, text="Calibration photos", command=self.interface_to_calibration)
+        self.Do_calibration = tk.Button(root, text="Calibration photos", command=self.switch_to_calibration)
         self.Do_calibration.grid(row=5, column=1)
 
-       # if self.active_calibration:
-        #self.interface_to_calibration()
 
-        self.text_calibration = "Une serie de 25 photos va suivre. Une photo chaque 2s."
+
+
+        self.text_calibration = ""
         self.active_calibration = False
         self.counter_to_calibration = 0
+        self.chess_boart_detected = False
 
 
         self.update_image()
-        #self.update_show_reference()
 
         root.mainloop()
 
@@ -155,8 +150,7 @@ class Main_window():
         contain_image["reference_image"] = cv2.imread(Main_window.URL_IMAGE, cv2.IMREAD_COLOR)
 
         image_sequence = [image]
-        #URL_IMAGE = Main_window.URL_IMAGE
-        #print(self.know_tracking_activate.get())
+
 
 
         try:
@@ -164,16 +158,6 @@ class Main_window():
                 self.update_show_reference()
                 reference_keypoints, reference_descriptors = get_features(image=image_sequence[0],
                                                                           index=index[0])
-
-
-
-                """reference_image_to_gray = cv2.GaussianBlur(reference_image_to_gray,
-                                                           (self.logo_blur_intensity * 2 + 1,
-                                                            self.logo_blur_intensity * 2 + 1),
-                                                           0)"""
-
-                #cv2.imshow('Logo', image)
-
 
 
                 test_keypoints, test_descriptors = get_features(image=frame, index=index[0])
@@ -221,8 +205,6 @@ class Main_window():
         # Get a frame from the video source
         ret, frame = self.get_frame()
 
-        #if self.active_calibration:
-            #frame = cv2.putText(img=frame, text=self.text_calibration, org=(150, 250), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(0, 255, 0),thickness=3)
 
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
@@ -245,7 +227,8 @@ class Main_window():
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
             if self.active_calibration:
                 text = self.canvas.create_text(C, anchor=tk.W, text=self.text_calibration, fill="blue")
-                self.canvas.after(1200, self.wipe_off, text)
+                #rectangle_chess = self.canvas.create_rectangle((RectangleCalibrationTop_x, RectangleCalibrationTop_y), (RectangleCalibrationBottom_x, RectangleCalibrationBottom_y), outline='blue')
+                self.canvas.after(1, self.wipe_off, text)
                 #print("erer")
 
 
@@ -286,6 +269,7 @@ class Main_window():
         self.update_show_snapshot()
 
     def create_and_destroy_rectangle(self, event):
+
         rectangle = Main_window.rectangle
         mouse_information = Main_window.mouse_information
         mouse_information_to_cropping = Main_window.mouse_information_to_cropping
@@ -383,29 +367,53 @@ class Main_window():
         #ratio_test[0] = (1/100)*float(ratio)
 
 
-    def interface_to_calibration(self):
+    def switch_to_calibration(self):
+        """
+        Function to switch activation from False to True or vice-versa when
+        to push on the button
 
+        """
+        self.active_calibration = not self.active_calibration
 
-        self.active_calibration = True
-        ret, frame = self.get_frame()
-
-        if not ret:
-            print("Can't receive frame (stream end?). Exiting ...")
-
-        else:
-            self.active_calibration = True
 
     def wipe_off(self, ident):
+
+        """Function to make the camera calibration"""
+
+        root = Main_window.root
+
+        calibrate_camera = Calibration_of_camera()
+
         ret, frame = self.get_frame()
+        ischessBoart = [0]
+        self.text_calibration = "IL est nécessaire que vous presentiez un chessBoart pour faire la calibration."
         self.counter_to_calibration = self.counter_to_calibration + 1
-        if self.counter_to_calibration % 2 == 0:
-            self.canvas.delete(ident)
-            self.text_calibration = str(self.counter_to_calibration)+"s"
-            if ret:
-                cv2.imwrite("./images_to_calibration/" + "image_calib" + str(self.counter_to_calibration) + ".jpg",
-                            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
+        if self.counter_to_calibration > 30:
+            ischessBoart[0] = 1
+
+        if ischessBoart[0] == 1:
+
+            if self.counter_to_calibration < 160 and ret:
+                self.text_calibration = "Une série de 100 photos de la chessBoart vont être prise, déplacer là de temps en temps."
+                if self.counter_to_calibration > 60:
+                    self.canvas.delete(ident)
+                    self.text_calibration = str(self.counter_to_calibration-60)+"s"
+                    cv2.imwrite("./images_to_calibration/" + "image_calib" + str(self.counter_to_calibration-60) + ".jpg",
+                                cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+            else:
+                self.canvas.delete(ident)
+
+                calibrate_camera.show_coners()
+                calibrate_camera.make_calibration()
+
+                print("-----------------------------------------------------")
+                print("Fin de la calibration, relancer l'algorithme.")
+                print("-----------------------------------------------------")
+
+
+                root.destroy()
 
 
 
