@@ -12,7 +12,7 @@ Thereby the **features-matching** algorithms proceed in three steps : the **dete
 <ins>**important note**</ins>
 
 As we said, the feature matching algorithm can detect image pixels that do not change, precisely those pixels that are robust to photometric,
-scales, rotations, ... changes. But it may be that the number of pixels found is not sufficient to reconstruct the image. therefore we will look for at 
+scale, rotation, ... changes. But it may be that the number of pixels found is not sufficient to reconstruct the image. therefore we will look for at 
 least four pixels, three of which are not aligned, which correspond between the two images. Then from these four pixels we are going to deduce 
 the homography which makes it possible to pass from one image to another. **Thus, from the correspondence between pixels we pass to the 
 correspondence between images**.
