@@ -10,7 +10,9 @@ from calibration import Calibration_of_camera
 
 
 class Main_window():
-    """Interface of algorithm : Show tracking of object and manipulation of parameters"""
+
+    """Interface of algorithm : Showing object tracking and manipulation of parameters"""
+
     # Principal window
     root = tk.Tk()
     root.title("features-matching-tracking")
@@ -236,6 +238,7 @@ class Main_window():
         self.canvas_show_image.create_image(0, 0, image=self.reference_photo, anchor=tk.NW)
 
     def update_show_snapshot(self):
+
         """Show snapshot image"""
 
         last_image = cv2.imread("images/frame.jpg", cv2.IMREAD_COLOR)
@@ -247,7 +250,9 @@ class Main_window():
         self.canvas_to_resize.create_image(0, 0, image=self.reference_photo, anchor=tk.NW)
 
     def snapshot(self):
+
         """To make snapshot and register snapshotting image"""
+
         ret, frame = self.get_frame()
         if ret:
             cv2.imwrite("images/" + "frame" + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
@@ -299,6 +304,7 @@ class Main_window():
     def cropping_of_image(self):
 
         """Mousse information to crop"""
+
         mouse_information_to_cropping = Main_window.mouse_information_to_cropping
         #print(mouse_information_to_cropping)
 
@@ -329,11 +335,10 @@ class Main_window():
 
 
     def switch_to_calibration(self):
-        """
-        Function to switch activation from False to True or vice-versa when
-        to push on the button
 
-        """
+        """ Function to switch activation from False to True or vice-versa when
+            to push on the button"""
+
         self.active_calibration = not self.active_calibration
 
     def wipe_off(self, ident):
