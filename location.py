@@ -47,7 +47,3 @@ class Location():
 
 
 
-# print(CoordinatePoints.shape)
-# print(points_img.shape)
-# local = Location(image_points=points_img).object_location()
-# print(local)
