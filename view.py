@@ -1,9 +1,8 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import cv2
-from functions import nothing, select_algorithm, algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features, chessBoartDetector
-from functions import INDEX_AKAZE, INDEX_BRISK, INDEX_ORB, RectangleCalibrationTop_x, RectangleCalibrationTop_y, RectangleCalibrationBottom_x, RectangleCalibrationBottom_y
-import time
+from functions import algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features
+from functions import INDEX
 from calibration import Calibration_of_camera
 
 # Create an instance of TKinter Window or frame
@@ -109,7 +108,7 @@ class Main_window():
         self.ratio_test = 0.8
 
         # To do the calibration
-        #self.window_calibration = None
+
         self.active_calibration = False
 
         self.Do_calibration = tk.Button(root, text="Calibration photos", command=self.switch_to_calibration)
@@ -227,9 +226,7 @@ class Main_window():
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
             if self.active_calibration:
                 text = self.canvas.create_text(C, anchor=tk.W, text=self.text_calibration, fill="blue")
-                #rectangle_chess = self.canvas.create_rectangle((RectangleCalibrationTop_x, RectangleCalibrationTop_y), (RectangleCalibrationBottom_x, RectangleCalibrationBottom_y), outline='blue')
                 self.canvas.after(1, self.wipe_off, text)
-                #print("erer")
 
 
 
@@ -240,7 +237,6 @@ class Main_window():
 
         self.reference_photo = ImageTk.PhotoImage(image=Image.fromarray(contain_image["sequence_image"]))
         self.canvas_show_image.create_image(0, 0, image=self.reference_photo, anchor=tk.NW)
-        #self.root_show_reference.after(1, self.update_show_reference)
 
     def update_show_snapshot(self):
         """To update image on  tkinter window"""
@@ -255,13 +251,11 @@ class Main_window():
         self.reference_photo = ImageTk.PhotoImage(image=Image.fromarray(last_image))
         self.canvas_to_resize.create_image(0, 0, image=self.reference_photo, anchor=tk.NW)
 
-        #root_two.after(20, self.update_image2)
 
     def snapshot(self):
         # Get a frame from the video source
         ret, frame = self.get_frame()
         if ret:
-            #strftime("%d-%m-%Y-%H-%M-%S") +
             cv2.imwrite("images/"+"frame" + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
             cv2.imwrite("images/"+"reference" + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
@@ -328,15 +322,15 @@ class Main_window():
 
     def command_akaze(self):
         index = Main_window.index
-        index[0] = INDEX_AKAZE
+        index[0] = INDEX["AKAZE"]
 
     def command_brisk(self):
         index = Main_window.index
-        index[0] = INDEX_BRISK
+        index[0] = INDEX["BRISK"]
 
     def command_orb(self):
         index = Main_window.index
-        index[0] = INDEX_ORB
+        index[0] = INDEX["ORB"]
 
     def command_desactive(self):
         index = Main_window.index
@@ -346,25 +340,21 @@ class Main_window():
         reference_blur = Main_window.reference_blur
         reference_blur[0] = blur
 
-        #reference_blur[0] = (1/100)*float(blur)
 
     def function_reference_scale(self, scale):
         reference_scale = Main_window.reference_scale
         print(scale)
         reference_scale[0] = scale
 
-        #reference_scale[0] = (1/100)*float(scale)
 
     def function_webcam_blur(self, webcam):
         webcam_blur = Main_window.webcam_blur
         webcam_blur[0] = webcam
 
-        #webcam_blur[0] = (1/100)*float(webcam)
 
     def function_ratio_test(self, ratio):
         ratio_test = Main_window.ratio_test
         ratio_test[0] = ratio
-        #ratio_test[0] = (1/100)*float(ratio)
 
 
     def switch_to_calibration(self):

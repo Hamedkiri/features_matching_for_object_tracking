@@ -20,7 +20,7 @@ the homography which makes it possible to pass from one image to another. If the
 ## The packages needed to use the algorithm
 
 * Install : **Python 3.6.13** (It is recommended to create a virtual environment. If you are used to using Pycharm or Anaconda it will be easy.)
-* Install requirement.txt file: **pip3 install -r requirements.txt**
+* Install requirement.txt file : **pip3 install -r requirements.txt**
   
  
 

@@ -16,13 +16,13 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Calibration_of_camera():
 
-    def __init__(self, path_images_calibration="./images_to_calibration"):
+    def __init__(self, path_images_calibration="./images_to_calibration", grid_size_width=4, grid_size_height=4):
         self.path_images_calibration = path_images_calibration
-        self.grid_size_width = 4
-        self.grid_size_height = 4
+        self.grid_size_width = grid_size_width
+        self.grid_size_height = grid_size_height
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-        self.objp = np.zeros((self.grid_size_width  * self.grid_size_height, 3), np.float32)
+        self.objp = np.zeros((self.grid_size_width * self.grid_size_height, 3), np.float32)
         self.objp[:, :2] = np.mgrid[0:self.grid_size_width, 0:self.grid_size_height].T.reshape(-1, 2)  # multiply by square size in mm ? 45*
 
         self.objpoints = []  # 3d point in real world space
