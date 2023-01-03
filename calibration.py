@@ -23,20 +23,21 @@ class Calibration_of_camera():
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
         self.objp = np.zeros((self.grid_size_width * self.grid_size_height, 3), np.float32)
-        self.objp[:, :2] = np.mgrid[0:self.grid_size_width, 0:self.grid_size_height].T.reshape(-1, 2)  # multiply by square size in mm ? 45*
-
-        self.objpoints = []  # 3d point in real world space
-        self.imgpoints = []  # 2d points in image plane.
+        # multiply by square size in mm ? 45*
+        self.objp[:, :2] = np.mgrid[0:self.grid_size_width, 0:self.grid_size_height].T.reshape(-1, 2)
+        # 3d point in real world space
+        self.objpoints = []
+        # 2d points in image plane.
+        self.imgpoints = []
         self.image_size = tuple()
 
         self.images = glob.glob(os.path.join(self.path_images_calibration, '*.jpg'))
         self.image_to_gray = None
 
     def show_coners(self):
+
         for fname in self.images:
-            #print(fname)
             img = cv2.imread(fname)
-            #print(img)
             self.image_size = img.shape
 
             self.image_to_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -78,8 +79,9 @@ class Calibration_of_camera():
         ])
 
         print("Calibrating camera with radial / tangential model ...")
+        # np.zeros(5), flags=cv.CALIB_FIX_K3 + cv.CALIB_FIX_K4 + cv.CALIB_FIX_K5 + cv.CALIB_FIX_K5) # flags=cv.CALIB_RATIONAL_MODEL)
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objpoints, self.imgpoints, self.image_to_gray.shape[::-1], init_mtx, None,
-                                                           flags=cv2.CALIB_USE_INTRINSIC_GUESS)  # np.zeros(5), flags=cv.CALIB_FIX_K3 + cv.CALIB_FIX_K4 + cv.CALIB_FIX_K5 + cv.CALIB_FIX_K5) # flags=cv.CALIB_RATIONAL_MODEL)
+                                                           flags=cv2.CALIB_USE_INTRINSIC_GUESS)
         # ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         print("Radial_tangential_calibration: ")
         print("ret: ", ret)

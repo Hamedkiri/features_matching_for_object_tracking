@@ -1,4 +1,4 @@
-# Features-matching to tracking object
+# Features-matching to track object
 
 ## Working principle of the features-matching algorithm
 
