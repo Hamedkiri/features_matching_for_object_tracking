@@ -8,7 +8,9 @@ INDEX = {"AKAZE": 1, "BRISK": 2, "ORB": 3, "SIFT": 4, "SURF": 5}
 
 
 def select_algorithm(index):
+
     """To select different algorithm of features-matching."""
+
     if index == INDEX["AKAZE"]:
         return cv.AKAZE_create()
     elif index == INDEX["BRISK"]:
@@ -20,7 +22,9 @@ def select_algorithm(index):
 
 
 def get_features(image, index):
+
     """Extraction of keypoints and descriptors in black-white image version."""
+
     image_to_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
     algorithm = select_algorithm(index=index)
@@ -30,7 +34,9 @@ def get_features(image, index):
 
 
 def algorithms_of_matching_features(index, reference_descriptors, test_descriptors):
+
     """Matching between the descriptors with different methods"""
+
     if index == INDEX["AKAZE"]:
         matcher = cv.DescriptorMatcher_create(cv.DescriptorMatcher_BRUTEFORCE_SL2)
     elif index == INDEX["BRISK"] or index == INDEX["ORB"]:
@@ -46,6 +52,7 @@ def algorithms_of_matching_features(index, reference_descriptors, test_descripto
 
 
 def search_good_match(index, keypoints_who_matches, ratio_test=0.8):
+
     """Select keypoints whose distance(difference) is less than the threshold(ratio_test)"""
 
     best_matchs = []
@@ -63,7 +70,9 @@ def search_good_match(index, keypoints_who_matches, ratio_test=0.8):
 
 
 def search_homography_between_images(reference_image, test_image, best_matchs, reference_keypoints, test_keypoints):
+
     """ To search homography between the two images """
+
     new_reference_image = reference_image
     reference_image_to_gray = cv.cvtColor(reference_image, cv2.COLOR_BGR2GRAY)
     # test_image_to_gray = cv.cvtColor(test_image, cv.COLOR_BGR2GRAY)
