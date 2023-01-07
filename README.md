@@ -28,10 +28,10 @@ the [homography](https://en.wikipedia.org/wiki/Homography_(computer_vision)) whi
 
 ## Idea behind this code
 
-<video width="320" height="240" controls>
-  <source src="videos/two_methods/fusion.mp4" type="video/mp4">
-</video>
 
+ 
+
+[![Video](http://img.youtube.com/vi/aosj9HxiDkw/0.jpg)](http://www.youtube.com/watch?v=aosj9HxiDkw)
 In this algorithm, we want to use a features-matching algorithm to track an object. Usually in features-matching algorithms one takes a reference image
 that the algorithm must find, but this reference image does not change. In object tracking, the object can be in motion and the goal is to track it as 
 it moves. **The idea behind this algorithm is to change the reference image by a part of a new image each time the object is detected in this image**. 
