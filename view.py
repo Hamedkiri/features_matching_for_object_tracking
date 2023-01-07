@@ -4,7 +4,7 @@ import cv2
 from functions import algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features
 from functions import INDEX
 from calibration import Calibration_of_camera
-
+from to_test import register_video, write_video
 
 # Create an instance of TKinter Window or frame
 
@@ -35,6 +35,7 @@ class Main_window():
     contain_image = {"reference_image": cv2.imread(URL_IMAGE, cv2.IMREAD_COLOR),
                      "sequence_image": cv2.imread(URL_IMAGE, cv2.IMREAD_COLOR)}
 
+
     def __init__(self, side=1100):
 
         root = Main_window.root
@@ -54,6 +55,17 @@ class Main_window():
         self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.side)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.side)
+
+        # Get video metadata
+        video_fps = self.capture.get(cv2.CAP_PROP_FPS),
+        height = self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        width = self.capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+        # we are using x264 codec for mp4
+        fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+        self.writer = cv2.VideoWriter('./videos/OUTPUT_PATH_new_meth.mp4', apiPreference=0, fourcc=fourcc,
+                                 fps=video_fps[0], frameSize=(int(width), int(height)))
+
 
         self.photo = None
         self.reference_photo = None
@@ -120,6 +132,8 @@ class Main_window():
 
         root.mainloop()
 
+
+
         cv2.destroyAllWindows()
 
     def get_frame(self):
@@ -128,6 +142,7 @@ class Main_window():
 
         if self.capture.isOpened():
             ret, frame = self.capture.read()
+
             if ret:
                 # Return a boolean success flag and the current frame converted to BGR
                 return ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -208,10 +223,16 @@ class Main_window():
 
         image_back = self.application_of_algorithm(frame=frame, image=contain_image["sequence_image"], index=index)
 
+
         if image_back is not None:
 
             self.photo = ImageTk.PhotoImage(image=Image.fromarray(image_back))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+            image_back = cv2.cvtColor(image_back, cv2.COLOR_RGB2BGR)
+            #print(image_back.shape)
+            self.writer.write(image_back)  # register video
+
+
 
         else:
 
@@ -225,6 +246,8 @@ class Main_window():
             if self.active_calibration:
                 text = self.canvas.create_text(C, anchor=tk.W, text=self.text_calibration, fill="blue")
                 self.canvas.after(1, self.wipe_off, text)
+            #write_video(file_path="./videos/test.mp4", frames=register_video, fps=24, side=self.side)
+
 
         root.after(1, self.update_image)
 

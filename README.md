@@ -26,7 +26,11 @@ the [homography](https://en.wikipedia.org/wiki/Homography_(computer_vision)) whi
 * Install : **Python 3.6.13** (It is recommended to create a virtual environment. If you are used to using Pycharm or Anaconda it will be easy.)
 * Install requirement.txt file : **pip3 install -r requirements.txt**
 
-## Idea behind this algorithm
+## Idea behind this code
+
+<video width="320" height="240" controls>
+  <source src="videos/two_methods/fusion.mp4" type="video/mp4">
+</video>
 
 In this algorithm, we want to use a features-matching algorithm to track an object. Usually in features-matching algorithms one takes a reference image
 that the algorithm must find, but this reference image does not change. In object tracking, the object can be in motion and the goal is to track it as 
