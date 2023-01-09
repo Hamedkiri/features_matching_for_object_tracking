@@ -26,10 +26,11 @@ def get_features(image, index):
     """Extraction of keypoints and descriptors in black-white image version."""
 
     image_to_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-
     algorithm = select_algorithm(index=index)
+
     #  Extracting features and descriptions in the image
     keypoints, descriptors = algorithm.detectAndCompute(image_to_gray, None)
+
     return keypoints, descriptors
 
 
@@ -39,8 +40,11 @@ def algorithms_of_matching_features(index, reference_descriptors, test_descripto
 
     if index == INDEX["AKAZE"]:
         matcher = cv.DescriptorMatcher_create(cv.DescriptorMatcher_BRUTEFORCE_SL2)
-    elif index == INDEX["BRISK"] or index == INDEX["ORB"]:
+
+    elif index == INDEX["ORB"] or index == INDEX["BRISK"]:
+        #print("orb")
         matcher = cv.BFMatcher(cv.NORM_HAMMING2)
+
     elif index == INDEX["SIFT"]:
         matcher = cv.BFMatcher(cv.NORM_L1, crossCheck=True)
     if index != INDEX["SIFT"]:

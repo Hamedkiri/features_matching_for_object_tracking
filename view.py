@@ -4,7 +4,6 @@ import cv2
 from functions import algorithms_of_matching_features, search_good_match, search_homography_between_images, get_features
 from functions import INDEX
 from calibration import Calibration_of_camera
-from to_test import register_video, write_video
 
 # Create an instance of TKinter Window or frame
 

@@ -52,4 +52,20 @@ image with a new image of the object, you have to know where it is. By exemple i
 
 Homography in **red** is detected but does not contain the image. **Thus, we select the homographies, and retain those which have a shape close to the rectangle and whose surface is greater than that of the reference image.** In this code when the homography respects this condition it is in **green**
 
+## how to use this code ?
 
+* **Step 1** : Take a capture with the object you want to track.
+
+ ![step_1](./images/images_for_presentation/step_1.png)
+ 
+* **Step 2** : Crop object in image.
+
+ ![step_2](./images/images_for_presentation/step_2.png)
+ 
+* **Step 3** : Choose an algorithm
+
+ ![step_3](./images/images_for_presentation/step_3.png)
+ 
+* **Step 4** : Activate the tracking algorithm.
+
+ ![step_4](./images/images_for_presentation/step_4.png)
