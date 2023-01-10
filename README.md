@@ -51,9 +51,11 @@ image with a new image of the object, you have to know where it is. For example 
 
 ![bad_homography](https://user-images.githubusercontent.com/82286853/211152708-ff011400-e484-4f6c-adbd-b8335c055c62.png)
 
-Homography in <span style="color:red">**red**</span> is detected but does not contain the image. **Thus, we select the homographies, and retain those which have a shape close to the rectangle 
+
+
+Homography in ```**red**```  is detected but does not contain the image. **Thus, we select the homographies, and retain those which have a shape close to the rectangle 
 and whose surface is greater than that of the reference image.** In this code when the homography respects this condition it is in 
-<span style="color:green">**green**</span>
+```**green**```.
 ## how to use this code ?
 
 * **Step 1** : Take a capture with the object you want to track.
