@@ -45,14 +45,15 @@ https://user-images.githubusercontent.com/82286853/211151063-e3463188-65c2-470c-
 
 **The main difficulty is to find a good criterion to know when the object is detected**. As we said, the feature matching algorithm can match images using homography. 
 But, this method can be problematic because the homography found does not always include the object to be searched. And if you want to constantly change the reference 
-image with a new image of the object, you have to know where it is. By exemple in this image : 
+image with a new image of the object, you have to know where it is. For example in this image : 
   
 
 
 ![bad_homography](https://user-images.githubusercontent.com/82286853/211152708-ff011400-e484-4f6c-adbd-b8335c055c62.png)
 
-Homography in **red** is detected but does not contain the image. **Thus, we select the homographies, and retain those which have a shape close to the rectangle and whose surface is greater than that of the reference image.** In this code when the homography respects this condition it is in **green**
-
+Homography in <span style="color:red">**red**</span> is detected but does not contain the image. **Thus, we select the homographies, and retain those which have a shape close to the rectangle 
+and whose surface is greater than that of the reference image.** In this code when the homography respects this condition it is in 
+<span style="color:green">**green**</span>
 ## how to use this code ?
 
 * **Step 1** : Take a capture with the object you want to track.
