@@ -6,7 +6,7 @@ When you observe an object, you can recognize it in different contexts and diffe
 different photos of an object some things don't change otherwise you would not be able to recognize it. The goal of the
 **[features matching](https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_feature2d/py_matcher/py_matcher.html)** 
 algorithm is to find the aspects, the pixels of the image which do not change, describe them and compare them with other images which show the same object. 
-The name of these pixels is **keypoints**.
+The name of these pixels are **keypoints**.
 
 
 Thereby the **[features matching](https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_feature2d/py_matcher/py_matcher.html)** 
@@ -19,7 +19,8 @@ scale, rotation, ... changes. But it may be that the number of pixels found is n
 least four pixels, three of which are not aligned, which correspond between the two images. Then from these four pixels we are going to deduce 
 the [homography](https://en.wikipedia.org/wiki/Homography_(computer_vision)) which makes it possible to pass from one image to another. If there is a 
 [homography](https://en.wikipedia.org/wiki/Homography_(computer_vision)) we can say that the two images correspond. 
-**Thus, from the correspondence between pixels we pass to the correspondence between images**.
+**Thus, from the correspondence between pixels we pass to the correspondence between images**. In this code we used two matching algorithms: 
+[AKAZE](http://tulipp.eu/wp-content/uploads/2019/03/2017_TUD_HEART_kalms.pdf) and [ORB](http://www.gwylab.com/download/ORB_2012.pdf)
 
 ## The packages needed to use the algorithm
 
